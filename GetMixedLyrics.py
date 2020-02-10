@@ -53,11 +53,6 @@ def get_songs_from_artist_lyrics(artist):
     except Exception as e:
         return "Exception occurred \n" + str(e)
 
-        #          url="https://www.lyrics.com/"+url
-  #          songAndLink=[name[0], url]
-            #listOfSongs.append(name[0])
-   #         listOfSongs.append(songAndLink)
-       #pprint(listOfSongs) ##########################LISTONE CON NOMI E LINK.
 
 
         # lyrics lies between up_partition and down_partition
