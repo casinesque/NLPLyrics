@@ -11,7 +11,7 @@ def remove_html_tags(text):
     clean = re.compile('<.*?>')
     return re.sub(clean, '', text)
 
-def get_songs_from_artist_songlyrics(artist):
+def get_songs_from_artist_lyrics(artist):
     artist = artist.lower()
     # remove all except alphanumeric characters from artist and song_title
     #artist = re.sub('[^A-Za-z0-9]+', "", artist)
@@ -29,25 +29,35 @@ def get_songs_from_artist_songlyrics(artist):
         table_body = table.find('tbody')
         rows = table_body.find_all('tr')
         listOfSongs=[]
-        listOfUrls=[]
+        finalList=[]
+        finalNameList=[]
+        finalUrlList=[]
         for row in rows:
-            cols = row.find_all('td')
-            urls = row.find_all('a')
-            url=(str(urls[0])).split('"')[1] # ricavo link per ogni canzone
-            cols=[ele.text.strip() for ele in cols]
-            #urls= [ele.text.strip() for ele in urls]
-            url="https://www.lyrics.com/"+url
-            songAndLink=[cols[0],url]
-            #listOfSongs.append(cols[0])
-            listOfSongs.append(songAndLink)
-        pprint(listOfSongs) ##########################LISTONE CON NOMI E LINK.
-        #print(listOfUrls)
-        #print(cleanAndUniqueUrlList)
+            htmlRow = row.find_all('td')
+            htmlRowUrl = row.find_all('a')
+            name=[ele.text.strip() for ele in htmlRow][0]
+            name = name.lower()
+            name = re.sub(r'\[.*?\]', "", name)  # RIMUOVO PARENTESI [
+            name = re.sub(r'\[.*?\]', "", name)  # RIMUOVO PARENTESI [
+            name = re.sub(r'\[.*? ', "", name)  # RIMUOVO PARENTESI (
+            name = name.split('[')[0] # RIMUOVO PARENTESI (
+            name = name.split('(')[0] # RIMUOVO PARENTESI (
+            name = name.strip()
+            if name not in finalNameList:
+                url=(str(htmlRowUrl[0])).split('"')[1] # ricavo link per ogni canzone
+                url = "https://www.lyrics.com/"+url
+                finalNameList.append(name)
+                finalUrlList.append(url)
+        finalList = [val for pair in zip(finalNameList, finalUrlList) for val in pair]
+        return finalList
+    except Exception as e:
+        return "Exception occurred \n" + str(e)
 
-
-        ###################DA QUI, TAGLIARE I LINK NELLA PARTE FINALE PER TOGLIERE I DOPPIONI.
-        ################### POI FARE FUNZIONE PER OTTENERE IL TESTO DA CIASCUNA API.
-
+        #          url="https://www.lyrics.com/"+url
+  #          songAndLink=[name[0], url]
+            #listOfSongs.append(name[0])
+   #         listOfSongs.append(songAndLink)
+       #pprint(listOfSongs) ##########################LISTONE CON NOMI E LINK.
 
 
         # lyrics lies between up_partition and down_partition
@@ -56,16 +66,18 @@ def get_songs_from_artist_songlyrics(artist):
         #lyrics = lyrics.split(up_partition)[1]
         #lyrics = lyrics.split(down_partition)[0]
         #lyrics=remove_html_tags(lyrics)
-        cListOfSongs=[]
+        #cListOfSongs=[]
+        #Removing version such as [DVD],[STUDIO VERSION], [LIVE AT]
+
+
+    '''
         for element in listOfSongs:
-            element=element.lower().strip()
-            element=re.sub(r'\[.*?\]',"", element) #RIMUOVO PARENTESI [
-            element=re.sub(r'\(.*?\)', "", element) #RIMUOVO PARENTESI (
-            cListOfSongs.append(element.strip())
-        cleanAndUniqueSongsList=list(dict.fromkeys(cListOfSongs))
-        return cleanAndUniqueSongsList #Lista di titoli unici
-    except Exception as e:
-        return "Exception occurred \n" + str(e)
+            element[0]=(element[0].lower())
+            element[0]=re.sub(r'\[.*?\]', "", element[0]) #RIMUOVO PARENTESI [
+            element[0]=re.sub(r'\(.*?\)', "", element[0]) #RIMUOVO PARENTESI (
+            element[0]=element[0].strip()
+        return listOfSongs #Lista di titoli unici
+    '''
 
 
 def get_lyrics_(artist, song_title):

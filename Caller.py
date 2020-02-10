@@ -4,5 +4,5 @@ import pprint
 artist='The Beatles'
 #song="Yellow SubMarine"
 
-list= GetMixedLyrics.get_songs_from_artist_songlyrics(artist)
+list= GetMixedLyrics.get_songs_from_artist_lyrics(artist)
 print(list)
