@@ -1,15 +1,32 @@
 import re
 import urllib.request
+import requests
 from bs4 import BeautifulSoup
+import time
 from pprint import pprint
-
+# gestione proxy vedere qui --> https://www.scrapehero.com/how-to-rotate-proxies-and-ip-addresses-using-python-3/
+#o qui --> https://blog.scrapinghub.com/python-requests-proxy
+# per user agent ---> https://www.scrapehero.com/how-to-fake-and-rotate-user-agents-using-python-3/
+proxies = {
+    "http":  'http://89.32.227.230:8080',
+    "https":  'http://89.32.227.230:8080',
+    "http":  'http://80.241.222.137:80',
+    "https":  'http://80.241.222.137:80',
+    "http": 'http://80.232.126.94:80',
+    "https": 'http://80.232.126.94:80',
+    "https": 'https://163.172.136.226:8811',
+    "http": 'https://163.172.136.226:8811',
+    "http":  'http://178.128.28.166:8080',
+    "https":  'http://178.128.28.166:8080',
+    #"http": 'http://209.50.52.162:9050',
+    #"https": 'http://209.50.52.162:9050'
+}
 def remove_html_tags(text):
     """Remove html tags from a string"""
     """So the idea is to build a regular expression which can find all the characters “< >” in the first incidence in a text, 
     and after that using sub function replace all the text between those symbols with an empty string."""
-    import re
     clean = re.compile('<.*?>')
-    return re.sub(clean, '', text)
+    return re.sub(clean, '', str(text))
 
 def get_songs_from_artist_lyrics(artist):
     artist = artist.lower()
@@ -20,7 +37,8 @@ def get_songs_from_artist_lyrics(artist):
     url = "https://www.lyrics.com/artist.php?name="+artist+"&o=1"
 
     try:
-        content = urllib.request.urlopen(url).read()
+        #content = urllib.request.urlopen(url).read()
+        content = requests.get(url,proxies=proxies).text
         soup = BeautifulSoup(content, 'html.parser')
         lyrics = str(soup)
         #listOfSongs=soup.findAll("div"),{"class":"tdata-ext"}
@@ -74,8 +92,27 @@ def get_songs_from_artist_lyrics(artist):
         return listOfSongs #Lista di titoli unici
     '''
 
+def get_all_lyrics_from_an_artist(artist):
+    artist = artist.lower()
+    all_songs= get_songs_from_artist_lyrics(artist)
+    all_separated_songs=[list(x) for x in zip(all_songs[::2], all_songs[1::2])] # creo una lista di sottoliste [[nome,url]...]
+    list_of_words=[]
+    for item in all_separated_songs:
+        url_lyric = (item[1])
+        time.sleep(0.5)
+        content = requests.get(url_lyric).text
+        soup = BeautifulSoup(content, 'html.parser')
+        # listOfSongs=soup.findAll("div"),{"class":"tdata-ext"}
+        # listOfSongs=soup.find('td', attrs={'class':'tdata'})
+        body_lyrics=soup.find('pre', attrs={'id': 'lyric-body-text'})
+        cleaned_text=remove_html_tags(body_lyrics)
+        print ("Sto scaricando il titolo di:" + item[0])
+        list_of_words.append(cleaned_text) # Ecco qua il testo di una singola canzone
+    return list_of_words # lista di tutte le parole. Problema, ci sono duplicati.
 
-def get_lyrics_(artist, song_title):
+
+
+def get_lyric_by_artist(artist, song_title):
     artist = artist.lower()
     song_title = song_title.lower()
     # remove all except alphanumeric characters from artist and song_title
