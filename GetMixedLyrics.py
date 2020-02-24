@@ -8,16 +8,19 @@ from pprint import pprint
 #o qui --> https://blog.scrapinghub.com/python-requests-proxy
 # per user agent ---> https://www.scrapehero.com/how-to-fake-and-rotate-user-agents-using-python-3/
 proxies = {
+    #FUNZIONANTI
     "http":  'http://89.32.227.230:8080',
-    "https":  'http://89.32.227.230:8080',
+    "https": 'http://89.32.227.230:8080',
+    #DA RIVEDERE
     "http":  'http://80.241.222.137:80',
     "https":  'http://80.241.222.137:80',
-    "http": 'http://80.232.126.94:80',
-    "https": 'http://80.232.126.94:80',
-    "https": 'https://163.172.136.226:8811',
-    "http": 'https://163.172.136.226:8811',
-    "http":  'http://178.128.28.166:8080',
-    "https":  'http://178.128.28.166:8080',
+    #"http": 'http://80.232.126.94:80',
+    #"https": 'http://80.232.126.94:80',
+    #"https": 'https://163.172.136.226:8811',
+    #"http": 'https://163.172.136.226:8811',
+    #"http":  'http://178.128.28.166:8080',
+    #"https":  'http://178.128.28.166:8080',
+    # da rivedere ancora
     #"http": 'http://209.50.52.162:9050',
     #"https": 'http://209.50.52.162:9050'
 }
@@ -28,6 +31,11 @@ def remove_html_tags(text):
     clean = re.compile('<.*?>')
     return re.sub(clean, '', str(text))
 
+def remove_parenthesis(text):
+    cleanedFromSquare = re.sub(r'\[.*?\]', "", text)  # RIMUOVO PARENTESI [
+    cleandedFromRound = re.sub(r'\(.*?\)', "", cleanedFromSquare)  # RIMUOVO PARENTESI (
+    return cleandedFromRound
+
 def get_songs_from_artist_lyrics(artist):
     artist = artist.lower()
     # remove all except alphanumeric characters from artist and song_title
@@ -37,8 +45,9 @@ def get_songs_from_artist_lyrics(artist):
     url = "https://www.lyrics.com/artist.php?name="+artist+"&o=1"
 
     try:
-        #content = urllib.request.urlopen(url).read()
-        content = requests.get(url,proxies=proxies).text
+        #content = requests.get(url,proxies=proxies).text
+        #todo: sistemare questi maledetti proxies. Per ora uso la versione senza.
+        content = requests.get(url).text
         soup = BeautifulSoup(content, 'html.parser')
         lyrics = str(soup)
         #listOfSongs=soup.findAll("div"),{"class":"tdata-ext"}
@@ -56,8 +65,7 @@ def get_songs_from_artist_lyrics(artist):
             name=[ele.text.strip() for ele in htmlRow][0]
             name = name.lower()
             name = re.sub(r'\[.*?\]', "", name)  # RIMUOVO PARENTESI [
-            name = re.sub(r'\[.*?\]', "", name)  # RIMUOVO PARENTESI [
-            name = re.sub(r'\[.*? ', "", name)  # RIMUOVO PARENTESI (
+            name = re.sub(r'\(.*?\)', "", name)  # RIMUOVO PARENTESI (
             name = name.split('[')[0] # RIMUOVO PARENTESI (
             name = name.split('(')[0] # RIMUOVO PARENTESI (
             name = name.strip()
@@ -105,10 +113,21 @@ def get_all_lyrics_from_an_artist(artist):
         # listOfSongs=soup.findAll("div"),{"class":"tdata-ext"}
         # listOfSongs=soup.find('td', attrs={'class':'tdata'})
         body_lyrics=soup.find('pre', attrs={'id': 'lyric-body-text'})
-        cleaned_text=remove_html_tags(body_lyrics)
+        noHtmlCleanedText=remove_html_tags(body_lyrics)
+        cleaned_text=remove_parenthesis(noHtmlCleanedText)
         print ("Sto scaricando il titolo di:" + item[0])
         list_of_words.append(cleaned_text) # Ecco qua il testo di una singola canzone
-    return list_of_words # lista di tutte le parole. Problema, ci sono duplicati.
+    return list_of_words # lista di tutte le parole. Problema, ci sono duplicati. # DA QUIIIIIIIIIII
+
+    # CONTROLLARE CHE I TESTI SIANO CORRETTI.
+
+
+
+
+
+
+
+
 
 
 
