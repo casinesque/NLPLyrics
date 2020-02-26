@@ -31,10 +31,16 @@ def remove_html_tags(text):
     clean = re.compile('<.*?>')
     return re.sub(clean, '', str(text))
 
+
 def remove_parenthesis(text):
     cleanedFromSquare = re.sub(r'\[.*?\]', "", text)  # RIMUOVO PARENTESI [
     cleandedFromRound = re.sub(r'\(.*?\)', "", cleanedFromSquare)  # RIMUOVO PARENTESI (
     return cleandedFromRound
+
+def leaveOnlyAlphabeticalChars(text):
+    #[^a-zA-Z]
+    clean = re.compile('[^a-zA-Z]')
+    return re.sub(clean,'',str(text))
 
 def get_songs_from_artist_lyrics(artist):
     artist = artist.lower()
@@ -72,9 +78,33 @@ def get_songs_from_artist_lyrics(artist):
             if name not in finalNameList:
                 url=(str(htmlRowUrl[0])).split('"')[1] # ricavo link per ogni canzone
                 url = "https://www.lyrics.com/"+url
-                finalNameList.append(name)
+                finalNameList.append(leaveOnlyAlphabeticalChars(name))
+                #ORA HO UNA LISTA COI NOMI UGUALI A CUI HO RIMOSSO COMPLETAMENTE LA PUNTEGGIATURA. UTILE PER CHIAMARCI UN DICT. SOPRA E RIMUOVERE DUPLICATI.
                 finalUrlList.append(url)
         finalList = [val for pair in zip(finalNameList, finalUrlList) for val in pair]
+        '''
+        PROVARE AD USARE:
+        
+        b = {}
+        for key, value in a:
+        if key not in b:
+        b[key] = value
+        
+        --------------
+        a = [['star','a'],['star','b'],['sailor','x'],['soda','http://...'],['sailor','y']]
+b = {}
+for key, value in a:
+    if key not in b:
+        b[key] = value
+        
+print(b)
+
+star is a and sailor is x, while in my dict(a) solution it would make star b and sailor y, so isn't this exactly what you would want?
+        
+        
+        '''
+
+
         return finalList
     except Exception as e:
         return "Exception occurred \n" + str(e)
@@ -91,18 +121,13 @@ def get_songs_from_artist_lyrics(artist):
         #Removing version such as [DVD],[STUDIO VERSION], [LIVE AT]
 
 
-    '''
-        for element in listOfSongs:
-            element[0]=(element[0].lower())
-            element[0]=re.sub(r'\[.*?\]', "", element[0]) #RIMUOVO PARENTESI [
-            element[0]=re.sub(r'\(.*?\)', "", element[0]) #RIMUOVO PARENTESI (
-            element[0]=element[0].strip()
-        return listOfSongs #Lista di titoli unici
-    '''
+
+
 
 def get_all_lyrics_from_an_artist(artist):
     artist = artist.lower()
     all_songs= get_songs_from_artist_lyrics(artist)
+    #Lista dove ogni elemento è [nome canzone, url] -- CONTIENE DUPLICATI E SIMILTUDINI.
     all_separated_songs=[list(x) for x in zip(all_songs[::2], all_songs[1::2])] # creo una lista di sottoliste [[nome,url]...]
     list_of_words=[]
     for item in all_separated_songs:
@@ -113,19 +138,11 @@ def get_all_lyrics_from_an_artist(artist):
         # listOfSongs=soup.findAll("div"),{"class":"tdata-ext"}
         # listOfSongs=soup.find('td', attrs={'class':'tdata'})
         body_lyrics=soup.find('pre', attrs={'id': 'lyric-body-text'})
-        noHtmlCleanedText=remove_html_tags(body_lyrics)
-        cleaned_text=remove_parenthesis(noHtmlCleanedText)
-        print ("Sto scaricando il titolo di:" + item[0])
+        noHtmlCleanedText=remove_html_tags(body_lyrics) # rimuovo html dal content
+        cleaned_text=remove_parenthesis(noHtmlCleanedText) # rimuovo parentesi dai testi
+        print ("Sto scaricando il titolo di:" + remove_parenthesis(item[0]))
         list_of_words.append(cleaned_text) # Ecco qua il testo di una singola canzone
     return list_of_words # lista di tutte le parole. Problema, ci sono duplicati. # DA QUIIIIIIIIIII
-
-    # CONTROLLARE CHE I TESTI SIANO CORRETTI.
-
-
-
-
-
-
 
 
 
