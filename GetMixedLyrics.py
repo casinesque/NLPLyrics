@@ -42,6 +42,22 @@ def leaveOnlyAlphabeticalChars(text):
     clean = re.compile('[^a-zA-Z]')
     return re.sub(clean,'',str(text))
 
+def remove_duplicate(items):
+    unique = []
+    names=[]
+    urls=[]
+    for item in items:
+        name=item[0]
+        url=item[1]
+        if name not in names:
+            names.append(name)
+            urls.append(url)
+    unique = [val for pair in zip(names, urls) for val in pair]
+    # RITORNO LA LISTA DI TUTTE LE CANZONI SINGOLE ! NO MORE DUPLICATES! DA QUIIIIIIIIIIIIIIIIIIIII
+    return unique
+
+
+
 def get_songs_from_artist_lyrics(artist):
     artist = artist.lower()
     # remove all except alphanumeric characters from artist and song_title
@@ -52,7 +68,7 @@ def get_songs_from_artist_lyrics(artist):
 
     try:
         #content = requests.get(url,proxies=proxies).text
-        #todo: sistemare questi maledetti proxies. Per ora uso la versione senza.
+        #TODO: sistemare questi maledetti proxies. Per ora uso la versione senza.
         content = requests.get(url).text
         soup = BeautifulSoup(content, 'html.parser')
         lyrics = str(soup)
@@ -82,6 +98,11 @@ def get_songs_from_artist_lyrics(artist):
                 #ORA HO UNA LISTA COI NOMI UGUALI A CUI HO RIMOSSO COMPLETAMENTE LA PUNTEGGIATURA. UTILE PER CHIAMARCI UN DICT. SOPRA E RIMUOVERE DUPLICATI.
                 finalUrlList.append(url)
         finalList = [val for pair in zip(finalNameList, finalUrlList) for val in pair]
+        #['1','www','1','www','2','www'...]
+        all_separated_final_list = [list(x) for x in zip(finalList[::2], finalList[1::2])]  # Ho creato una lista di liste [[[]]
+        print(remove_duplicate(all_separated_final_list))
+        print(finalList)
+        return finalList
         '''
         PROVARE AD USARE:
         
@@ -105,7 +126,6 @@ star is a and sailor is x, while in my dict(a) solution it would make star b and
         '''
 
 
-        return finalList
     except Exception as e:
         return "Exception occurred \n" + str(e)
 
