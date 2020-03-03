@@ -3,6 +3,7 @@ import urllib.request
 import requests
 from bs4 import BeautifulSoup
 import time
+import editdistance
 from pprint import pprint
 # gestione proxy vedere qui --> https://www.scrapehero.com/how-to-rotate-proxies-and-ip-addresses-using-python-3/
 #o qui --> https://blog.scrapinghub.com/python-requests-proxy
@@ -41,7 +42,7 @@ def leaveOnlyAlphabeticalChars(text):
     #[^a-zA-Z]
     clean = re.compile('[^a-zA-Z]')
     return re.sub(clean,'',str(text))
-
+''' # RIMUOVE I DUPLICATI -------------- UTILE DA TENERE.
 def remove_duplicate(items):
     unique = []
     names=[]
@@ -55,6 +56,31 @@ def remove_duplicate(items):
     unique = [val for pair in zip(names, urls) for val in pair]
     # RITORNO LA LISTA DI TUTTE LE CANZONI SINGOLE ! NO MORE DUPLICATES! DA QUIIIIIIIIIIIIIIIIIIIII
     return unique
+'''
+'''def calculate_minimum_edit_distance(words):
+    mapOfSongs = {}
+    for word in words[::2]:
+        index=words.index(word)
+        mapOfSongs[word]=words[index+1]
+        #if editdistance.eval(words[index],word[index+2]) <= 2:
+         # print("ciao")
+     return mapOfSongs
+'''
+def remove_duplicates_by_dict(words):
+    a = {}
+    unique = []
+    a = dict(zip(words[::2], words[1::2]))
+    unique= a.items()
+    for item in unique[::2]: # DA QUI. VOGLIO RIMUOVERE I TITOLI CON EDIT DISTANCE PICCOLA MA NON POSSO FARE UNIQUE SU LISTA DI TUPLE.
+        index=unique.index(item)
+        if (index)!=len(unique)-1:
+            next=index+2
+        if editdistance.eval(unique[index],unique[next])<=4:
+            print("eccone uno")
+    return unique
+
+
+
 
 
 
@@ -100,8 +126,11 @@ def get_songs_from_artist_lyrics(artist):
         finalList = [val for pair in zip(finalNameList, finalUrlList) for val in pair]
         #['1','www','1','www','2','www'...]
         all_separated_final_list = [list(x) for x in zip(finalList[::2], finalList[1::2])]  # Ho creato una lista di liste [[[]]
-        print(remove_duplicate(all_separated_final_list))
         print(finalList)
+        finalList = remove_duplicates_by_dict(finalList) #ECCO QUA CHE HO CREATO IL DIZIONARIO SENZA USARE LA FUNZIONE APPOSITA!
+        #finalList=remove_duplicate(all_separated_final_list)
+        print(finalList)
+
         return finalList
         '''
         PROVARE AD USARE:
