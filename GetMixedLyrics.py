@@ -25,6 +25,10 @@ proxies = {
     #"http": 'http://209.50.52.162:9050',
     #"https": 'http://209.50.52.162:9050'
 }
+
+MINIMUM_EDIT_DITANCE_TRESHOLD = 1
+
+
 def remove_html_tags(text):
     """Remove html tags from a string"""
     """So the idea is to build a regular expression which can find all the characters “< >” in the first incidence in a text, 
@@ -42,6 +46,8 @@ def leaveOnlyAlphabeticalChars(text):
     #[^a-zA-Z]
     clean = re.compile('[^a-zA-Z]')
     return re.sub(clean,'',str(text))
+
+
 ''' # RIMUOVE I DUPLICATI -------------- UTILE DA TENERE.
 def remove_duplicate(items):
     unique = []
@@ -71,17 +77,18 @@ def remove_duplicates_by_dict(words):
     unique = []
     a = dict(zip(words[::2], words[1::2]))
     unique= a.items()
-    for item in unique[::2]: # DA QUI. VOGLIO RIMUOVERE I TITOLI CON EDIT DISTANCE PICCOLA MA NON POSSO FARE UNIQUE SU LISTA DI TUPLE.
-        index=unique.index(item)
-        if (index)!=len(unique)-1:
-            next=index+2
-        if editdistance.eval(unique[index],unique[next])<=4:
-            print("eccone uno")
-    return unique
-
-
-
-
+    unique=[[i,j] for i,j in unique] #trasformo lista di tuple in lista
+    flattened_unique_list=[]
+    list_of_similar=[]
+    for sublist in unique: # list flattening !
+        for element in sublist:
+            flattened_unique_list.append(element)
+            #CONTROLLO LA MED. SOLO CON TRESHOLD A 1 SONO SICURO DI NON TOGLIERE CANZONI BUONE.
+    for left, right in zip(flattened_unique_list[:-2],flattened_unique_list[2:]):
+        if editdistance.eval(left,right)<= MINIMUM_EDIT_DITANCE_TRESHOLD:
+                list_of_similar.append(right) # empiricamente i dx sono quelli piu corretti, quindi cancello quelli a sx.
+    #TODO: rimuovere questi elementi da questa lista dalla nostra principale. Ora i rimanenti li toglieremo dal testo.
+    print(list_of_similar)
 
 
 def get_songs_from_artist_lyrics(artist):
