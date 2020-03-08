@@ -4,6 +4,8 @@ import requests
 from bs4 import BeautifulSoup
 import time
 import editdistance
+import spacy
+import en_core_web_md
 from pprint import pprint
 # gestione proxy vedere qui --> https://www.scrapehero.com/how-to-rotate-proxies-and-ip-addresses-using-python-3/
 #o qui --> https://blog.scrapinghub.com/python-requests-proxy
@@ -27,6 +29,30 @@ proxies = {
 }
 
 MINIMUM_EDIT_DITANCE_TRESHOLD = 1
+
+nlp = en_core_web_md.load()
+
+
+def process_text(text):
+    doc = nlp(text.lower())
+    result = []
+    for token in doc:
+        if token.text in nlp.Defaults.stop_words:
+            continue
+        if token.is_punct:
+            continue
+        if token.lemma_ == '-PRON-':
+            continue
+        result.append(token.lemma_)
+    return " ".join(result)
+
+
+def calculate_similarity(text1, text2):
+    base = nlp(process_text(text1))
+    compare = nlp(process_text(text2))
+    return base.similarity(compare)
+
+
 
 
 def remove_html_tags(text):
@@ -139,29 +165,14 @@ def get_songs_from_artist_lyrics(artist):
                 #ORA HO UNA LISTA COI NOMI UGUALI A CUI HO RIMOSSO COMPLETAMENTE LA PUNTEGGIATURA. UTILE PER CHIAMARCI UN DICT. SOPRA E RIMUOVERE DUPLICATI.
                 finalUrlList.append(url)
         finalList = [val for pair in zip(finalNameList, finalUrlList) for val in pair]
-        #['1','www','1','www','2','www'...]
         all_separated_final_list = [list(x) for x in zip(finalList[::2], finalList[1::2])]  # Ho creato una lista di liste [[[]]
         print(finalList)
         finalList = remove_duplicates_by_dict(finalList) #ECCO QUA CHE HO CREATO IL DIZIONARIO SENZA USARE LA FUNZIONE APPOSITA!
-        #finalList=remove_duplicate(all_separated_final_list)
         print(finalList)
         return finalList
 
     except Exception as e:
         return "Exception occurred \n" + str(e)
-
-
-
-        # lyrics lies between up_partition and down_partition
-        #up_partition = '<!-- Usage of azlyrics.com content by any third-party lyrics provider is prohibited by our licensing agreement. Sorry about that. -->'
-        #down_partition = '<!-- MxM banner -->'
-        #lyrics = lyrics.split(up_partition)[1]
-        #lyrics = lyrics.split(down_partition)[0]
-        #lyrics=remove_html_tags(lyrics)
-        #cListOfSongs=[]
-        #Removing version such as [DVD],[STUDIO VERSION], [LIVE AT]
-
-
 
 
 
