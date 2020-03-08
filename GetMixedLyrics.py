@@ -28,7 +28,7 @@ proxies = {
     #"https": 'http://209.50.52.162:9050'
 }
 
-MINIMUM_EDIT_DITANCE_TRESHOLD = 1
+MINIMUM_EDIT_DISTANCE_THRESHOLD = 1
 
 nlp = en_core_web_md.load()
 
@@ -70,9 +70,13 @@ def remove_parenthesis(text):
 
 def leaveOnlyAlphabeticalChars(text):
     #[^a-zA-Z]
-    clean = re.compile('[^a-zA-Z]')
+    clean = re.compile('[,\.!\?-]')
     return re.sub(clean,'',str(text))
 
+def removeSpaces(text):
+    # [^a-zA-Z]
+    clean = re.compile('[^a-zA-Z]')
+    return re.sub(clean, '', str(text))
 
 ''' # RIMUOVE I DUPLICATI -------------- UTILE DA TENERE.
 def remove_duplicate(items):
@@ -111,8 +115,21 @@ def remove_duplicates_by_dict(words):
             flattened_unique_list.append(element)
             #CONTROLLO LA MED. SOLO CON TRESHOLD A 1 SONO SICURO DI NON TOGLIERE CANZONI BUONE.
     for left, right in zip(flattened_unique_list[:-2],flattened_unique_list[2:]):
-        if editdistance.eval(left,right)<= MINIMUM_EDIT_DITANCE_TRESHOLD or left in right: # rimuovo tutte quelle sporche o che hanno nomi allungati della stessa canzone
-                list_of_similar.append(right) # empiricamente i dx sono quelli piu corretti, quindi cancello quelli a sx.
+        if calculate_similarity(left, right) > 0.95 or editdistance.eval(left, right)<= MINIMUM_EDIT_DISTANCE_THRESHOLD : #rimuovo tutte quelle sporche o che hanno nomi allungati della stessa canzone
+                        #nome = nomecognome.replace(nomecognome.split("paolo", 2)[1], "")
+                        '''
+                                 #nome = nomecognome.replace(nomecognome.split("paolo", 2)[1], "")
+                        if right.startswith(left):
+                            #longer = left if len(left)>len(right) else right
+                            endofString=len(left)
+                            if right[endofString+1]:
+                                list_of_similar.append(right) # empiricamente i dx sono quelli piu corretti, quindi cancello quelli a sx.
+                        '''
+                        if right.startswith(left):
+                            longer = left if len(left)>len(right) else right
+                            endofString=len(left)
+                            longer=longer[:endofString]
+                            list_of_similar.append(longer) # empiricamente i dx sono quelli piu corretti, quindi cancello quelli a sx.
     for key in list(mapNameUrl.keys()):
         if key in list_of_similar:
             try:
@@ -122,6 +139,7 @@ def remove_duplicates_by_dict(words):
     cleanedList=mapNameUrl.items()
     unique = [[i, j] for i, j in cleanedList] # ritorno la lista in uscita pulita !
     return unique
+
 
 
 def get_songs_from_artist_lyrics(artist):
@@ -157,7 +175,6 @@ def get_songs_from_artist_lyrics(artist):
             name = name.split('[')[0] # RIMUOVO PARENTESI (
             name = name.split('(')[0] # RIMUOVO PARENTESI (
             name = name.strip()
-            name = name.replace('and', '') #RIMUOVO PAROLE  NEI TITOLI PIU COMUNI
             if name not in finalNameList:
                 url=(str(htmlRowUrl[0])).split('"')[1] # ricavo link per ogni canzone
                 url = "https://www.lyrics.com/"+url
