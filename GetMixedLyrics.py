@@ -36,9 +36,9 @@ nlp = en_core_web_md.load()
 def process_text(text):
     doc = nlp(text.lower())
     result = []
-    for token in doc:
-        if token.text in nlp.Defaults.stop_words:
-            continue
+    for token in doc: #'come and get it' e 'come together' venivano ridotte a 'come' e basta! NO!
+        #if token.text in nlp.Defaults.stop_words: #mi porta via troppe parole. Provo a commentarlo.
+        #    continue
         if token.is_punct:
             continue
         if token.lemma_ == '-PRON-':
@@ -115,21 +115,20 @@ def remove_duplicates_by_dict(words):
             flattened_unique_list.append(element)
             #CONTROLLO LA MED. SOLO CON TRESHOLD A 1 SONO SICURO DI NON TOGLIERE CANZONI BUONE.
     for left, right in zip(flattened_unique_list[:-2],flattened_unique_list[2:]):
-        if calculate_similarity(left, right) > 0.95 or editdistance.eval(left, right)<= MINIMUM_EDIT_DISTANCE_THRESHOLD : #rimuovo tutte quelle sporche o che hanno nomi allungati della stessa canzone
-                        #nome = nomecognome.replace(nomecognome.split("paolo", 2)[1], "")
-                        '''
-                                 #nome = nomecognome.replace(nomecognome.split("paolo", 2)[1], "")
-                        if right.startswith(left):
-                            #longer = left if len(left)>len(right) else right
-                            endofString=len(left)
-                            if right[endofString+1]:
-                                list_of_similar.append(right) # empiricamente i dx sono quelli piu corretti, quindi cancello quelli a sx.
-                        '''
-                        if right.startswith(left):
-                            longer = left if len(left)>len(right) else right
-                            endofString=len(left)
-                            longer=longer[:endofString]
-                            list_of_similar.append(longer) # empiricamente i dx sono quelli piu corretti, quindi cancello quelli a sx.
+        if calculate_similarity(left, right) > 0.95 or editdistance.eval(left, right)<= MINIMUM_EDIT_DISTANCE_THRESHOLD or right in left or left in right: #rimuovo tutte quelle sporche o che hanno nomi allungati della stessa canzone
+            #nome = nomecognome.replace(nomecognome.split("paolo", 2)[1], "")
+            '''
+                     #nome = nomecognome.replace(nomecognome.split("paolo", 2)[1], "")
+            if right.startswith(left):
+                #longer = left if len(left)>len(right) else right
+                endofString=len(left)
+                if right[endofString+1]:
+                    list_of_similar.append(right) # empiricamente i dx sono quelli piu corretti, quindi cancello quelli a sx.
+            '''
+            eval=editdistance.eval(left, right)
+            print(calculate_similarity(left, right))
+            longer = left if len(left) > len(right) else right
+            list_of_similar.append(longer) # empiricamente i dx sono quelli piu corretti, quindi cancello quelli a sx.
     for key in list(mapNameUrl.keys()):
         if key in list_of_similar:
             try:
