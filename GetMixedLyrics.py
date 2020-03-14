@@ -125,8 +125,10 @@ def remove_duplicates_by_dict(words):
                 if right[endofString+1]:
                     list_of_similar.append(right) # empiricamente i dx sono quelli piu corretti, quindi cancello quelli a sx.
             '''
+            ################# CONTROLLARE NUMERO PAROLE IN COMUNE TRA LE DUE.
             eval=editdistance.eval(left, right)
             print(calculate_similarity(left, right))
+
             longer = left if len(left) > len(right) else right
             list_of_similar.append(longer) # empiricamente i dx sono quelli piu corretti, quindi cancello quelli a sx.
     for key in list(mapNameUrl.keys()):
@@ -186,7 +188,6 @@ def get_songs_from_artist_lyrics(artist):
         finalList = remove_duplicates_by_dict(finalList) #ECCO QUA CHE HO CREATO IL DIZIONARIO SENZA USARE LA FUNZIONE APPOSITA!
         print(finalList)
         return finalList
-
     except Exception as e:
         return "Exception occurred \n" + str(e)
 
@@ -207,9 +208,9 @@ def get_all_lyrics_from_an_artist(artist):
         # listOfSongs=soup.find('td', attrs={'class':'tdata'})
         body_lyrics=soup.find('pre', attrs={'id': 'lyric-body-text'})
         noHtmlCleanedText=remove_html_tags(body_lyrics) # rimuovo html dal content
-        cleaned_text=remove_parenthesis(noHtmlCleanedText) # rimuovo parentesi dai testi
+        cleaned_text=remove_parenthesis(noHtmlCleanedText)  # rimuovo parentesi dai testi
         print ("Sto scaricando il titolo di:" + remove_parenthesis(item[0]))
-        list_of_words.append(cleaned_text) # Ecco qua il testo di una singola canzone
+        list_of_words.append(cleaned_text.replace('\n',' ').replace('\r',''))
     return list_of_words # lista di tutte le parole. Problema, ci sono duplicati. # DA QUIIIIIIIIIII
 
 
