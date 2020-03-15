@@ -39,16 +39,20 @@ def count_lyrics_word_frequency(list):
             lemma_tokens.append(lemmatizer.lemmatize(word, get_wordnet_pos(word)))
 
     print(lemma_tokens)
+
     punct= "[!”#$%&’()*+,-./:;<=>?@[\]^_`{|}~]:"
+    '''
     for item in lemma_tokens:
-        if (len(item))<= 3: #elimino ulteriore noise non filtrato finora
-            lemma_tokens.remove((item))
+        if (len(item))< 4: #elimino ulteriore noise non filtrato finora
+            lemma_tokens.remove(item)
         elif item in punct:
             lemma_tokens.remove(item)
+    '''
     freq = nltk.FreqDist()
-    for word in lemma_tokens: #list of list iteration
+    for word in lemma_tokens: #list of list iteration, set for remove duplicates
+        if len(word) >= 4 and word not in punct:
             freq[word] +=1
     print(freq.keys())
     for key in freq:
         print(key, ': ', freq[key])
-    freq.plot(20, cumulative=False)
+    freq.plot(100, cumulative=False)

@@ -201,7 +201,7 @@ def get_all_lyrics_from_an_artist(artist):
     list_of_words=[]
     for item in all_songs:
         url_lyric = (item[1])
-        time.sleep(0.5)
+        #time.sleep(0.5)
         content = requests.get(url_lyric).text
         soup = BeautifulSoup(content, 'html.parser')
         # listOfSongs=soup.findAll("div"),{"class":"tdata-ext"}
