@@ -6,7 +6,7 @@ import time
 import editdistance
 import spacy
 import en_core_web_md
-from pprint import pprint
+import lxml
 # gestione proxy vedere qui --> https://www.scrapehero.com/how-to-rotate-proxies-and-ip-addresses-using-python-3/
 #o qui --> https://blog.scrapinghub.com/python-requests-proxy
 # per user agent ---> https://www.scrapehero.com/how-to-fake-and-rotate-user-agents-using-python-3/
@@ -78,30 +78,6 @@ def removeSpaces(text):
     clean = re.compile('[^a-zA-Z]')
     return re.sub(clean, '', str(text))
 
-''' # RIMUOVE I DUPLICATI -------------- UTILE DA TENERE.
-def remove_duplicate(items):
-    unique = []
-    names=[]
-    urls=[]
-    for item in items:
-        name=item[0]
-        url=item[1]
-        if name not in names:
-            names.append(name)
-            urls.append(url)
-    unique = [val for pair in zip(names, urls) for val in pair]
-    # RITORNO LA LISTA DI TUTTE LE CANZONI SINGOLE ! NO MORE DUPLICATES! DA QUIIIIIIIIIIIIIIIIIIIII
-    return unique
-'''
-'''def calculate_minimum_edit_distance(words):
-    mapOfSongs = {}
-    for word in words[::2]:
-        index=words.index(word)
-        mapOfSongs[word]=words[index+1]
-        #if editdistance.eval(words[index],word[index+2]) <= 2:
-         # print("ciao")
-     return mapOfSongs
-'''
 def remove_duplicates_by_dict(words):
     mapNameUrl = {}
     unique = []
@@ -116,16 +92,6 @@ def remove_duplicates_by_dict(words):
             #CONTROLLO LA MED. SOLO CON TRESHOLD A 1 SONO SICURO DI NON TOGLIERE CANZONI BUONE.
     for left, right in zip(flattened_unique_list[:-2],flattened_unique_list[2:]):
         if calculate_similarity(left, right) > 0.95 or editdistance.eval(left, right)<= MINIMUM_EDIT_DISTANCE_THRESHOLD or right in left or left in right: #rimuovo tutte quelle sporche o che hanno nomi allungati della stessa canzone
-            #nome = nomecognome.replace(nomecognome.split("paolo", 2)[1], "")
-            '''
-                     #nome = nomecognome.replace(nomecognome.split("paolo", 2)[1], "")
-            if right.startswith(left):
-                #longer = left if len(left)>len(right) else right
-                endofString=len(left)
-                if right[endofString+1]:
-                    list_of_similar.append(right) # empiricamente i dx sono quelli piu corretti, quindi cancello quelli a sx.
-            '''
-            ################# CONTROLLARE NUMERO PAROLE IN COMUNE TRA LE DUE.
             eval=editdistance.eval(left, right)
             print(calculate_similarity(left, right))
 
@@ -152,13 +118,10 @@ def get_songs_from_artist_lyrics(artist):
     url = "https://www.lyrics.com/artist.php?name="+artist+"&o=1"
 
     try:
-        #content = requests.get(url,proxies=proxies).text
         #TODO: sistemare questi maledetti proxies. Per ora uso la versione senza.
         content = requests.get(url).text
-        soup = BeautifulSoup(content, 'html.parser')
+        soup = BeautifulSoup(content, 'lxml')
         lyrics = str(soup)
-        #listOfSongs=soup.findAll("div"),{"class":"tdata-ext"}
-        #listOfSongs=soup.find('td', attrs={'class':'tdata'})
         table = soup.find('table', attrs={'class': 'tdata'})
         table_body = table.find('tbody')
         rows = table_body.find_all('tr')
@@ -203,15 +166,16 @@ def get_all_lyrics_from_an_artist(artist):
         url_lyric = (item[1])
         #time.sleep(0.5)
         content = requests.get(url_lyric).text
-        soup = BeautifulSoup(content, 'html.parser')
+        #soup = BeautifulSoup(content, 'html.parser')
+        soup = BeautifulSoup(content, 'lxml')
         # listOfSongs=soup.findAll("div"),{"class":"tdata-ext"}
         # listOfSongs=soup.find('td', attrs={'class':'tdata'})
         body_lyrics=soup.find('pre', attrs={'id': 'lyric-body-text'})
         noHtmlCleanedText=remove_html_tags(body_lyrics) # rimuovo html dal content
         cleaned_text=remove_parenthesis(noHtmlCleanedText)  # rimuovo parentesi dai testi
-        print ("Sto scaricando il titolo di:" + remove_parenthesis(item[0]))
+        print ("Sto scaricando il testo di:" + remove_parenthesis(item[0]))
         list_of_words.append(cleaned_text.replace('\n',' ').replace('\r',''))
-    return list_of_words # lista di tutte le parole. Problema, ci sono duplicati. # DA QUIIIIIIIIIII
+    return list_of_words # lista di tutte le parole.
 
 
 
