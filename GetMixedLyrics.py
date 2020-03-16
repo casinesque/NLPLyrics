@@ -122,11 +122,6 @@ def get_songs_from_artist_lyrics(artist):
         content = requests.get(url).text
         only_tdata_tags=SoupStrainer('table',{'class': 'tdata'})
         soup = BeautifulSoup(content, 'lxml',parse_only=only_tdata_tags) # permette di parsare direttamente la classe richiesta.
-        lyrics = str(soup)
-        #table = soup.find('table', attrs={'class': 'tdata'})
-        table_body = soup.select('tbody tr')
-        #rows = table_body.find_all('td')
-        listOfSongs=[]
         finalList=[]
         finalNameList=[]
         finalUrlList=[]
@@ -167,12 +162,9 @@ def get_all_lyrics_from_an_artist(artist):
         url_lyric = (item[1])
         #time.sleep(0.5)
         content = requests.get(url_lyric).text
-        #soup = BeautifulSoup(content, 'html.parser')
-        soup = BeautifulSoup(content, 'lxml')
-        # listOfSongs=soup.findAll("div"),{"class":"tdata-ext"}
-        # listOfSongs=soup.find('td', attrs={'class':'tdata'})
-        body_lyrics=soup.find('pre', attrs={'id': 'lyric-body-text'})
-        noHtmlCleanedText=remove_html_tags(body_lyrics) # rimuovo html dal content
+        only_pre_tag=SoupStrainer('pre',{'id': 'lyric-body-text'}) # Permette di scaricare solo quella classe non tutto la pagina web!
+        soup = BeautifulSoup(content, 'lxml',parse_only=only_pre_tag)
+        noHtmlCleanedText=remove_html_tags(str(soup)) # rimuovo html dal content
         cleaned_text=remove_parenthesis(noHtmlCleanedText)  # rimuovo parentesi dai testi
         print ("Sto scaricando il testo di:" + remove_parenthesis(item[0]))
         list_of_words.append(cleaned_text.replace('\n',' ').replace('\r',''))
