@@ -1,7 +1,7 @@
 import re
 import urllib.request
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, SoupStrainer
 import time
 import editdistance
 import spacy
@@ -120,16 +120,17 @@ def get_songs_from_artist_lyrics(artist):
     try:
         #TODO: sistemare questi maledetti proxies. Per ora uso la versione senza.
         content = requests.get(url).text
-        soup = BeautifulSoup(content, 'lxml')
+        only_tdata_tags=SoupStrainer('table',{'class': 'tdata'})
+        soup = BeautifulSoup(content, 'lxml',parse_only=only_tdata_tags) # permette di parsare direttamente la classe richiesta.
         lyrics = str(soup)
-        table = soup.find('table', attrs={'class': 'tdata'})
-        table_body = table.find('tbody')
-        rows = table_body.find_all('tr')
+        #table = soup.find('table', attrs={'class': 'tdata'})
+        table_body = soup.select('tbody tr')
+        #rows = table_body.find_all('td')
         listOfSongs=[]
         finalList=[]
         finalNameList=[]
         finalUrlList=[]
-        for row in rows:
+        for row in soup.select('tbody tr'):
             htmlRow = row.find_all('td')
             htmlRowUrl = row.find_all('a')
             name=[ele.text.strip() for ele in htmlRow][0]
