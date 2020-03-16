@@ -7,6 +7,7 @@ import editdistance
 import spacy
 import en_core_web_md
 import lxml
+from difflib import SequenceMatcher
 
 # gestione proxy vedere qui --> https://www.scrapehero.com/how-to-rotate-proxies-and-ip-addresses-using-python-3/
 # o qui --> https://blog.scrapinghub.com/python-requests-proxy
@@ -104,10 +105,10 @@ def remove_duplicates_by_dict(words):
             flattened_unique_list.append(element)
             # CONTROLLO LA MED. SOLO CON TRESHOLD A 1 SONO SICURO DI NON TOGLIERE CANZONI BUONE.
     for left, right in zip(flattened_unique_list[:-2], flattened_unique_list[2:]):
-        if calculate_similarity(left, right) > 0.95 or editdistance.eval(left,
-                                                                         right) <= MINIMUM_EDIT_DISTANCE_THRESHOLD or right in left or left in right:  # rimuovo tutte quelle sporche o che hanno nomi allungati della stessa canzone
-            eval = editdistance.eval(left, right)
-            print(calculate_similarity(left, right))
+        if calculate_similarity(left, right) > 0.95 or editdistance.eval(left,right) <= MINIMUM_EDIT_DISTANCE_THRESHOLD or right in left or left in right:  # rimuovo tutte quelle sporche o che hanno nomi allungati della stessa canzone
+            # SequenceMatcher(None,left,right).ratio()>0.80
+            #eval = editdistance.eval(left, right)
+            #print(calculate_similarity(left, right))
 
             longer = left if len(left) > len(right) else right
             list_of_similar.append(longer)  # empiricamente i dx sono quelli piu corretti, quindi cancello quelli a sx.
@@ -148,6 +149,7 @@ def get_songs_from_artist_lyrics(artist):
             name = name.split('[')[0]  # RIMUOVO PARENTESI (
             name = name.split('(')[0]  # RIMUOVO PARENTESI (
             name = name.strip()
+            name=name.replace("'","")
             name= remove_invalid_chars(name)
             if name not in finalNameList:
                 url = (str(htmlRowUrl[0])).split('"')[1]  # ricavo link per ogni canzone
@@ -185,6 +187,27 @@ def get_all_lyrics_from_an_artist(artist):
         print("Downloading lyrics of:" + remove_parenthesis(item[0]))
         list_of_words.append(cleaned_text.replace('\n', ' ').replace('\r', ''))
     return list_of_words  # lista di tutte le parole.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def get_lyric_by_artist(artist, song_title):
