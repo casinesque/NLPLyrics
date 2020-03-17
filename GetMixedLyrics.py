@@ -105,13 +105,15 @@ def remove_duplicates_by_dict(words):
             flattened_unique_list.append(element)
             # CONTROLLO LA MED. SOLO CON TRESHOLD A 1 SONO SICURO DI NON TOGLIERE CANZONI BUONE.
     for left, right in zip(flattened_unique_list[:-2], flattened_unique_list[2:]):
-        if calculate_similarity(left, right) > 0.95 or editdistance.eval(left,right) <= MINIMUM_EDIT_DISTANCE_THRESHOLD or right in left or left in right:  # rimuovo tutte quelle sporche o che hanno nomi allungati della stessa canzone
-            # SequenceMatcher(None,left,right).ratio()>0.80
+        # Pensare se metterla##################
+        #if calculate_similarity(left, right) > 0.95 or editdistance.eval(left,right) <= MINIMUM_EDIT_DISTANCE_THRESHOLD or removeSpaces(right) in removeSpaces(left) or removeSpaces(left) in removeSpaces(right):  # rimuovo tutte quelle sporche o che hanno nomi allungati della stessa canzone
+            if not left.startswith("https:"):
+                if SequenceMatcher(None, left, right).ratio() > 0.80:
             #eval = editdistance.eval(left, right)
             #print(calculate_similarity(left, right))
 
-            longer = left if len(left) > len(right) else right
-            list_of_similar.append(longer)  # empiricamente i dx sono quelli piu corretti, quindi cancello quelli a sx.
+                    longer = left if len(left) > len(right) else right
+                    list_of_similar.append(longer)  # empiricamente i dx sono quelli piu corretti, quindi cancello quelli a sx.
     for key in list(mapNameUrl.keys()):
         if key in list_of_similar:
             try:
@@ -149,18 +151,18 @@ def get_songs_from_artist_lyrics(artist):
             name = name.split('[')[0]  # RIMUOVO PARENTESI (
             name = name.split('(')[0]  # RIMUOVO PARENTESI (
             name = name.strip()
-            name=name.replace("'","")
+            name= name.replace("’","")
+            name= name.replace("‘", '').replace("’", '').replace("'", '')
             name= remove_invalid_chars(name)
             if name not in finalNameList:
                 url = (str(htmlRowUrl[0])).split('"')[1]  # ricavo link per ogni canzone
-                url = "https://www.lyrics.com/" + url
+                url = "https://www.lyrics.com" + url
                 finalNameList.append(leaveOnlyAlphabeticalChars(name))
                 # ORA HO UNA LISTA COI NOMI UGUALI A CUI HO RIMOSSO COMPLETAMENTE LA PUNTEGGIATURA. UTILE PER CHIAMARCI UN DICT. SOPRA E RIMUOVERE DUPLICATI.
                 finalUrlList.append(url)
         finalList = [val for pair in zip(finalNameList, finalUrlList) for val in pair]
         all_separated_final_list = [list(x) for x in
                                     zip(finalList[::2], finalList[1::2])]  # Ho creato una lista di liste [[[]]
-        print(finalList)
         finalList = remove_duplicates_by_dict(
             finalList)  # ECCO QUA CHE HO CREATO IL DIZIONARIO SENZA USARE LA FUNZIONE APPOSITA!
         print(finalList)

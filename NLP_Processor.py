@@ -23,8 +23,6 @@ def get_wordnet_pos(word):
 
 
 def count_lyrics_word_frequency(list):
-
-
     tokens=[]
     for item in list:
         tokens.append(word_tokenize(item.lower())) #tokenization
@@ -46,4 +44,4 @@ def count_lyrics_word_frequency(list):
     #WordCloud_Processor.create_wordcloud(lemma_tokens, 100)
     for key in freq:
         print(key, ': ', freq[key])
-    freq.plot(100, cumulative=False)
+    freq.plot(50, cumulative=False)
