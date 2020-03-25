@@ -3,7 +3,7 @@ import string
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.corpus import wordnet
-import matplotlib
+import matplotlib.pyplot as plt
 from nltk.stem import WordNetLemmatizer
 import WordCloud_Processor
 
@@ -22,7 +22,7 @@ def get_wordnet_pos(word):
 
 
 
-def count_lyrics_word_frequency(list):
+def count_lyrics_word_frequency(list,N):
     tokens=[]
     for item in list:
         tokens.append(word_tokenize(item.lower())) #tokenization
@@ -32,16 +32,15 @@ def count_lyrics_word_frequency(list):
             if segment in stopwords.words('english') or segment in string.punctuation:
                 token.remove(segment)                 # removing that word from the token list of a single song
     lemma_tokens = []
-    for list in tokens:  # RICREO UNA LISTA COI VALORI LEMMATIZZATI, VOGLIO VEDERE DIFFERENZA.
+    for list in tokens:  #Additional list with lemmatized tokens
         for word in list:
             lemma_tokens.append(lemmatizer.lemmatize(word, get_wordnet_pos(word)))
     punct= "[!”#$%&’()*+,-./:;<=>?@[\]^_`{|}~]:"
     freq = nltk.FreqDist()
-    for word in lemma_tokens: #list of list iteration, set for remove duplicates
+    for word in lemma_tokens: #manually creates the dict, we only considering strings longer than 4 chars.
         if len(word) >= 4 and word not in punct:
             freq[word] +=1
-    print(freq.keys())
-    #WordCloud_Processor.create_wordcloud(lemma_tokens, 100)
+    print(freq.keys()) #print the map of words and relative frequency
     for key in freq:
         print(key, ': ', freq[key])
-    freq.plot(50, cumulative=False)
+    freq.plot(50, cumulative=False) #plot the first 50 most common words
